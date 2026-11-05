@@ -12,8 +12,8 @@ They are practicing three things:
 - Using automated, manual, and agent-driven testing, each for what it does well.
 
 The premise is theirs to change, and a personal, odd, or small game is welcome.
-Blandness is the only wrong creative choice, and this could become a portfolio piece
-if they want it to. See "Creative direction" below.
+A plain game is acceptable, but a game with a point of view is more fun, and this could
+become a portfolio piece if they want it to. See "Creative direction" below.
 
 Each push, choose what is most worth saying, and let the rest wait for a push where
 it matters more.
