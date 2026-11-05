@@ -1,0 +1,59 @@
+import { apply, type Command, type Direction } from "../core/mod.ts";
+import type { GameState } from "../core/mod.ts";
+import type { Presenter } from "./presenter.ts";
+
+const ARROWS: Record<string, Direction> = {
+  ArrowUp: "north",
+  ArrowDown: "south",
+  ArrowLeft: "west",
+  ArrowRight: "east",
+};
+
+// Input in, core in the middle, presenter out. None of those three knows the others,
+// which makes this a Mediator: https://refactoring.guru/design-patterns/mediator
+// There is no frame loop here: a command runs on a key press or when playback ends.
+export class Controller {
+  private readonly state: GameState;
+  private readonly presenter: Presenter;
+  // A tap made during a walk, kept until the presenter is free.
+  private pressed: Command | null = null;
+  private held: Direction[] = [];
+
+  constructor(state: GameState, presenter: Presenter) {
+    this.state = state;
+    this.presenter = presenter;
+    presenter.onIdle = () => this.next();
+    addEventListener("keydown", (event) => this.keyDown(event));
+    addEventListener("keyup", (event) => this.keyUp(event));
+    addEventListener("blur", () => this.held = []);
+  }
+
+  private keyDown(event: KeyboardEvent) {
+    const direction = ARROWS[event.key];
+    if (!direction || event.ctrlKey || event.metaKey || event.altKey) return;
+    // Otherwise arrow keys would also scroll the page.
+    event.preventDefault();
+    if (event.repeat) return;
+    this.held.push(direction);
+    this.pressed = { type: "move", direction };
+    this.next();
+  }
+
+  private keyUp(event: KeyboardEvent) {
+    this.held = this.held.filter((direction) =>
+      direction !== ARROWS[event.key]
+    );
+  }
+
+  private next() {
+    // While the presenter is busy, input waits and the core hears nothing. The
+    // busy state lives here in game/: the core never learns about animation.
+    if (this.presenter.busy) return;
+
+    const held = this.held.at(-1);
+    const command: Command | null = this.pressed ??
+      (held ? { type: "move", direction: held } : null);
+    this.pressed = null;
+    if (command) this.presenter.play(apply(this.state, command));
+  }
+}
