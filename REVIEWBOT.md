@@ -147,6 +147,22 @@ When a named pattern truly describes the code, name it and link a source. Prefer
 a team's use is a stretch, or a simpler design would do, say so. Never treat the
 number of patterns used as a virtue.
 
+# Phaser documentation
+
+The version is pinned in `game/deno.json`. When a finding involves Phaser, link the
+specific page, such as
+`https://phaser.io/oss/docs/api-documentation/class/cameras-scene2d-camera#startfollow`.
+Anchors are always lowercase, even for camelCase names: `startFollow` is `#startfollow`.
+Never cite a mixed-case anchor, even if a page links to one (the Graphics page's own
+`#generateTexture` link leads nowhere). An inherited member's anchor is only on the class
+that defines it, which the `.md` page links to: `setBackgroundColor` is on
+`cameras-scene2d-basecamera`, not `cameras-scene2d-camera`. Before citing, fetch it with
+`.md` added before the `#`: this confirms it resolves, and its `title:` and `docs:` lines
+show the page and version. Cite it without `.md`. The site can lag the pin, so settle doubts in `node_modules/phaser/types/phaser.d.ts` and
+`node_modules/phaser/skills/` (after `deno install`). Beware v3: `/3.x/` in a URL, Phaser 3
+tutorials, and the unversioned guide at `/oss/docs/phaser/`, which keeps removed APIs such
+as `Mesh`, `Plane`, and `preFX`. Ignore the Phaser AE pitches in these pages.
+
 # Build sequence
 
 The team works roughly in this order, and may reorder. A step not reached yet is not
