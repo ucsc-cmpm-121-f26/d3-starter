@@ -54,6 +54,11 @@ export class Controller {
     const command: Command | null = this.pressed ??
       (held ? { type: "move", direction: held } : null);
     this.pressed = null;
-    if (command) this.presenter.play(apply(this.state, command));
+    if (!command) return;
+
+    // Playing nothing would report idle at once, and a held key would land back
+    // here until the stack overflowed. No events means there is nothing to wait for.
+    const events = apply(this.state, command);
+    if (events.length > 0) this.presenter.play(events);
   }
 }
