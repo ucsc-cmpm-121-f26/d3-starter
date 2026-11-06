@@ -18,11 +18,19 @@ export class Controller {
   // A tap made during a walk, kept until the presenter is free.
   private pressed: Command | null = null;
   private held: Direction[] = [];
+  // Runs when nothing is playing and no next command has started, so it is safe
+  // to read the core here. During playback, the core is ahead of what the player
+  // has seen, and reading it would show the future.
+  onSettled: () => void = () => {};
 
   constructor(state: GameState, presenter: Presenter) {
     this.state = state;
     this.presenter = presenter;
-    presenter.onIdle = () => this.next();
+    presenter.onIdle = () => {
+      this.next();
+      // next() may have just started another walk.
+      if (!presenter.busy) this.onSettled();
+    };
     addEventListener("keydown", (event) => this.keyDown(event));
     addEventListener("keyup", (event) => this.keyUp(event));
     addEventListener("blur", () => this.held = []);
