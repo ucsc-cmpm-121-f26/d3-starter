@@ -116,8 +116,13 @@ jobs:
 
           Review the push from $BEFORE to $GITHUB_SHA." | tee "$RUNNER_TEMP/events.jsonl" || status=$?
           if [ -s review/review.md ]; then
-            if [ "$status" -ne 0 ]; then
-              printf '**Partial review: this run ended early (exit %s), so this is an unfinished draft.**\n\n' "$status" | cat - review/review.md > "$RUNNER_TEMP/partial.md"
+            # opencode can exit 1 even after recovering from a dropped connection, so ask
+            # how the session ended instead: a finished one's last step stopped by itself.
+            # A killed run's last step wanted more tools, or its events are cut off.
+            ended=$(jq -rs '[.[] | select(.type == "step_finish")] | last.part.reason' "$RUNNER_TEMP/events.jsonl" || true)
+            echo "opencode exited $status, and its last step's reason was: $ended"
+            if [ "$ended" != "stop" ]; then
+              printf '**Partial review: this run ended early, so this is an unfinished draft.**\n\n' | cat - review/review.md > "$RUNNER_TEMP/partial.md"
               mv "$RUNNER_TEMP/partial.md" review/review.md
             fi
             # The footer is measured here, not written by the model. A killed run may leave
